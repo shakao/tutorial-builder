@@ -13,20 +13,26 @@ interface TutorialStepProps {
     headerContentMd: string;
     hintContentMd?: string;
     showDialog?: boolean;
+
+    visibleHint?: boolean;
+
+    swapSteps: (startIndex: number, endIndex: number) => void;
 }
 
 export function TutorialStep(props: TutorialStepProps) {
-    const { index, className, title, headerContentMd, hintContentMd, showDialog} = props;
+    const { index, className, title, headerContentMd, hintContentMd,
+        showDialog, visibleHint, swapSteps } = props;
     const [ stepTitle, setStepTitle ] = useState(title);
     const [ stepContent, setStepContent ] = useState(headerContentMd);
-    const [ showHintContent, setShowHintContent ] = useState(!!hintContentMd);
-    const [ hint, setHint ] = useState(parseHint(hintContentMd));
+    const [ hintContent, setHintContent ] = useState(hintContentMd);
+    const [ showHintContent, setShowHintContent ] = useState(visibleHint);
     const [ isDialog, setIsDialog ] = useState(showDialog);
     const hintEitorRef = useRef(null);
 
     useEffect(() => setStepTitle(title), [title]);
     useEffect(() => setStepContent(headerContentMd), [headerContentMd]);
-    useEffect(() => setHint(parseHint(hintContentMd)), [hintContentMd]);
+    useEffect(() => setHintContent(hintContentMd), [hintContentMd]);
+    useEffect(() => setShowHintContent(visibleHint), [visibleHint]);
     useEffect(() => setIsDialog(showDialog), [showDialog]);
 
     const onStepTitleChange = (evt: any) => {
@@ -37,28 +43,35 @@ export function TutorialStep(props: TutorialStepProps) {
         setStepContent(evt.target.value)
     }
 
-    const toggleHintContent = () => {
-        setShowHintContent(!showHintContent);
-    }
-
     function handleHintEditorRef(editor: any, monaco: any) {
         hintEitorRef.current = editor;
+        monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+            noSemanticValidation: true,
+            noSyntaxValidation: true,
+        });
     }
+
 
     return (
         <TutorialContext.Consumer>
             {({tutorial, setSteps, updateStep}) => {
+                const hint = parseHint(hintContent);
                 const currentStep = {
                     title: stepTitle,
                     headerContentMd: stepContent,
-                    hintContentMd: getHintMarkdown(hint),
-                    showDialog: isDialog
+                    hintContentMd: hintContent,
+                    showDialog: isDialog,
+                    visibleHint: showHintContent
                 }
-
                 return (<div className={`tutorial-step ${className || ""}`}>
                     <div className="tutorial-step-body">
                         <div className="step-handle">
-                            <i className="ui icon arrows alternate vertical" />
+                            <div className="step-handle-top">
+                                <i className="ui icon chevron up" onClick={() => swapSteps(index, index - 1)} />
+                            </div>
+                            <div className="step-handle-bottom">
+                                <i className="ui icon chevron down" onClick={() => swapSteps(index, index + 1)}  />
+                            </div>
                         </div>
                         <div className="step-content" draggable={false}>
                             <div className="step-title">
@@ -67,7 +80,6 @@ export function TutorialStep(props: TutorialStepProps) {
                                 <span>Dialog</span>
                                 <i className={`ui icon square outline ${isDialog ? "check" : ""}`}
                                     onClick={() => updateStep(index, {
-                                        ...currentStep,
                                         showDialog: !isDialog,
                                         showHint: !isDialog
                                     })} />
@@ -81,14 +93,13 @@ export function TutorialStep(props: TutorialStepProps) {
                                     <div className="hint-controls-left">
                                         <span>Has hint</span>
                                         <i className={`ui icon square outline ${showHintContent ? "check" : ""}`}
-                                            onClick={toggleHintContent} />
+                                            onClick={() => updateStep(index, { visibleHint: !showHintContent })} />
                                     </div>
                                     {showHintContent && <div className="hint-controls-right">
                                         <label>Language:</label>
                                         <select name="language" value={hint?.language}
                                             onChange={(evt: any) => {
                                                 updateStep(index, {
-                                                    ...currentStep,
                                                     hintContentMd: getHintMarkdown({text: hint?.text || "", language: evt.target.value})
                                                 })
                                             }}>
@@ -100,15 +111,14 @@ export function TutorialStep(props: TutorialStepProps) {
                                     </div>}
                                 </div>
                                 {showHintContent && <div className="hint-body">
-                                    <Editor defaultLanguage="typescript" defaultValue={hint?.text}
-                                        // TODO turn off error highlighting
+                                    <Editor defaultLanguage="typescript" value={hint?.text}
                                         options={{ minimap: { enabled: false } }}
                                         onMount={handleHintEditorRef}
                                         onChange={(value?: string) => {
+                                            const newHint = parseHint(hintContentMd);
                                             updateStep(index, {
-                                                ...currentStep,
                                                 // TODO these defaults are probably bad
-                                                hintContentMd: getHintMarkdown({text: value || "", language: hint?.language || "markdown"})
+                                                hintContentMd: getHintMarkdown({text: value || "", language: newHint?.language || "markdown"})
                                             })
                                         }} />
                                 </div>}

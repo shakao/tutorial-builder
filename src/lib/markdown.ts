@@ -1,22 +1,26 @@
 import { TutorialStepInfo, TutorialHint, HintLanguage } from '../contexts/tutorial-context';
 
-export function getTutorialMarkdown(steps: TutorialStepInfo[]) {
-    let md = "";
+export function getTutorialMarkdown(title: string, steps: TutorialStepInfo[]) {
+    let md = `### @explicitHints true\n\n# ${title}\n\n`;
     steps.forEach((step, i) => {
-        const { title, showHint, showDialog, headerContentMd, hintContentMd } = step;
+        const { title, showHint, showDialog, headerContentMd, hintContentMd, visibleHint } = step;
         let titleMd = `${title || `Step ${i}`} ${(showHint || showDialog) ? "@showHint" : ""} ${showDialog ? "@showDialog" : ""}`
         if (!title) titleMd = `{${titleMd}}`;
         md += `## ${titleMd}\n\n`;
         md += `${headerContentMd}\n\n`;
-        md += `${hintContentMd}\n\n`;
+        if (visibleHint) md += `#### ~ tutorialhint\n${hintContentMd}\n\n`;
     })
 
     return md;
 }
 
-export function parseTutorial(md: string) {
+export function parseTutorial(md: string): { title: string, steps: TutorialStepInfo[] } {
     const parsedTutorial = (window as any).pxt.tutorial.parseTutorial(md);
-    return parsedTutorial.steps;
+    const steps = parsedTutorial.steps;
+    steps.forEach((step: TutorialStepInfo) => {
+        step.visibleHint = !!step.hintContentMd;
+    })
+    return { title: parsedTutorial.title, steps: steps };
 }
 
 export function getHintMarkdown(hint?: TutorialHint): string | undefined {
