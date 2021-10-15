@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/tutorial-builder/static/css/main.4ffe0368.chunk.css",
+    "main.js": "/tutorial-builder/static/js/main.46090375.chunk.js",
+    "main.js.map": "/tutorial-builder/static/js/main.46090375.chunk.js.map",
+    "runtime-main.js": "/tutorial-builder/static/js/runtime-main.abb33739.js",
+    "runtime-main.js.map": "/tutorial-builder/static/js/runtime-main.abb33739.js.map",
+    "static/js/2.23c1bc86.chunk.js": "/tutorial-builder/static/js/2.23c1bc86.chunk.js",
+    "static/js/2.23c1bc86.chunk.js.map": "/tutorial-builder/static/js/2.23c1bc86.chunk.js.map",
+    "index.html": "/tutorial-builder/index.html",
+    "static/css/main.4ffe0368.chunk.css.map": "/tutorial-builder/static/css/main.4ffe0368.chunk.css.map",
+    "static/js/2.23c1bc86.chunk.js.LICENSE.txt": "/tutorial-builder/static/js/2.23c1bc86.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.abb33739.js",
+    "static/js/2.23c1bc86.chunk.js",
+    "static/css/main.4ffe0368.chunk.css",
+    "static/js/main.46090375.chunk.js"
+  ]
+}
